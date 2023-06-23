@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -51,11 +50,12 @@ public class ProductAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.layout_product_list_item, null);
         }
         Product product = list.get(position);
-        TextView productName = (TextView) convertView.findViewById(R.id.productName);
+        TextView productName = (TextView) convertView.findViewById(R.id.inputProductName);
         TextView productStock = (TextView) convertView.findViewById(R.id.productStock);
         TextView productPrice = (TextView) convertView.findViewById(R.id.productPrice);
         TextView productOrderCount = (TextView) convertView.findViewById(R.id.productOrderCount);
         ImageButton addToCartButton = (ImageButton) convertView.findViewById(R.id.addToCartButton);
+        ImageButton removeFromCartButton = (ImageButton) convertView.findViewById(R.id.removeFromCartButton);
 
         String stockText = "Stok: {{productStock}}";
         stockText = stockText.replace("{{productStock}}", ""+product.getStock());
@@ -73,6 +73,12 @@ public class ProductAdapter extends BaseAdapter {
 
         addToCartButton.setOnClickListener(v -> {
             product.addOrderCount();
+            String updatedOrderCountText = "Dipesan: {{productOrderCount}}";
+            updatedOrderCountText = updatedOrderCountText.replace("{{productOrderCount}}", ""+product.getOrderCount());
+            productOrderCount.setText((CharSequence) updatedOrderCountText);
+        });
+        removeFromCartButton.setOnClickListener(v -> {
+            product.subtractOrderCount();
             String updatedOrderCountText = "Dipesan: {{productOrderCount}}";
             updatedOrderCountText = updatedOrderCountText.replace("{{productOrderCount}}", ""+product.getOrderCount());
             productOrderCount.setText((CharSequence) updatedOrderCountText);
