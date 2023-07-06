@@ -1,24 +1,34 @@
 package com.example.warkopzara.ui.login;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import android.util.Patterns;
-
-import com.example.warkopzara.data.LoginRepository;
-import com.example.warkopzara.data.Result;
+import com.example.warkopzara.Config;
 import com.example.warkopzara.data.model.LoggedInUser;
 import com.example.warkopzara.R;
+import com.example.warkopzara.providers.MyUrlRequestCallback;
+import com.google.gson.JsonObject;
+
+import org.chromium.net.CronetEngine;
+import org.chromium.net.UploadDataProviders;
+import org.chromium.net.UrlRequest;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LoginViewModel extends ViewModel {
-
+    private static final String TAG  = "LoginViewModel";
     private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
     private MutableLiveData<LoginResult> loginResult = new MutableLiveData<>();
-    private LoginRepository loginRepository;
+    LoginViewModel() {
 
-    LoginViewModel(LoginRepository loginRepository) {
-        this.loginRepository = loginRepository;
     }
 
     LiveData<LoginFormState> getLoginFormState() {
@@ -29,16 +39,46 @@ public class LoginViewModel extends ViewModel {
         return loginResult;
     }
 
-    public void login(String username, String password) {
-        // can be launched in a separate asynchronous job
-        Result<LoggedInUser> result = loginRepository.login(username, password);
+    public void login(Context context, String username, String password) {
+        JsonObject requestBodyJson = new JsonObject();
+        requestBodyJson.addProperty("username", username);
+        requestBodyJson.addProperty("password", password);
+        String jsonBody = requestBodyJson.toString();
 
-        if (result instanceof Result.Success) {
-            LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
-            loginResult.setValue(new LoginResult(new LoggedInUserView(data.getDisplayName())));
-        } else {
-            loginResult.setValue(new LoginResult(R.string.login_failed));
-        }
+        CronetEngine.Builder myBuilder = new CronetEngine.Builder(context);
+        CronetEngine cronetEngine = myBuilder.build();
+        Executor executor = Executors.newSingleThreadExecutor();
+        MyUrlRequestCallback requestCallback = new MyUrlRequestCallback(result -> {
+            try {
+                JSONObject data = new JSONObject(result.toString());
+                String responseBody = data.getString("body");
+                int statusCode = data.getInt("statusCode");
+                if (statusCode == 200) { //Some kind of success
+                    JSONObject body = new JSONObject(responseBody);
+                    int id = body.getJSONObject("data").getInt("id");
+                    String fullName = body.getJSONObject("data").getString("fullname");
+                    String token = body.getString("token");
+                    loginResult.postValue(new LoginResult(new LoggedInUser(String.valueOf(id), fullName, token)));
+                } else {
+                    loginResult.postValue(new LoginResult(R.string.login_failed));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        });
+        UrlRequest.Builder requestBuilder = cronetEngine
+                .newUrlRequestBuilder(
+                        Config.BE_URL+"/api/v1/user/login",
+                        requestCallback,
+                        executor
+                )
+                .setHttpMethod("POST")
+                .addHeader("Content-Type","application/json")
+                .setUploadDataProvider(UploadDataProviders.create(jsonBody.getBytes()),executor);
+
+        UrlRequest request = requestBuilder.build();
+        request.start();
+
     }
 
     public void loginDataChanged(String username, String password) {
@@ -56,15 +96,11 @@ public class LoginViewModel extends ViewModel {
         if (username == null) {
             return false;
         }
-        if (username.contains("@")) {
-            return Patterns.EMAIL_ADDRESS.matcher(username).matches();
-        } else {
-            return !username.trim().isEmpty();
-        }
+        return !username.trim().isEmpty();
     }
 
     // A placeholder password validation check
     private boolean isPasswordValid(String password) {
-        return password != null && password.trim().length() > 5;
+        return password != null && password.trim().length() > 4;
     }
 }

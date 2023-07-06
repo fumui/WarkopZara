@@ -1,7 +1,9 @@
 package com.example.warkopzara.ui.checkout;
 
+import android.content.Intent;
 import android.os.Bundle;
 
+import com.example.warkopzara.data.model.Transaction;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,10 +24,22 @@ public class CheckoutActivity extends AppCompatActivity {
     private AppBarConfiguration appBarConfiguration;
     private ActivityTransactionBinding binding;
 
+    private Transaction cart;
+
+    public void setCart(Transaction cart) {
+        this.cart = cart;
+    }
+
+    public Transaction getCart() {
+        return cart;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Intent intent = getIntent();
+        cart = intent.getParcelableExtra("cart");
         binding = ActivityTransactionBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 

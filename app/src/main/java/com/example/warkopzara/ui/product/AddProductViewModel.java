@@ -1,4 +1,4 @@
-package com.example.warkopzara.ui.gallery;
+package com.example.warkopzara.ui.product;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

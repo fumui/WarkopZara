@@ -14,7 +14,7 @@
         app:srcCompat="@drawable/coffeemix" />
 
     <TextView
-        android:id="@+id/inputProductName"
+        android:id="@+id/productName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="{{productName}}"
@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:text="Stok: {{productStock}}"
         app:layout_constraintStart_toEndOf="@+id/productImage"
-        app:layout_constraintTop_toBottomOf="@+id/inputProductName" />
+        app:layout_constraintTop_toBottomOf="@+id/productName" />
 
     <TextView
         android:id="@+id/productPrice"

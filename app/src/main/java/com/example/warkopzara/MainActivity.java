@@ -1,10 +1,13 @@
 package com.example.warkopzara;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 
+import com.example.warkopzara.data.model.Transaction;
 import com.example.warkopzara.databinding.ActivityMainBinding;
 import com.example.warkopzara.ui.checkout.CheckoutActivity;
 import com.example.warkopzara.ui.login.LoginActivity;
@@ -17,6 +20,8 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.Date;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int LOGIN_REQUEST_CODE = 999;
@@ -24,25 +29,30 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
     private boolean isLoggedIn = false;
+
+    private Transaction inCart = new Transaction();
+
+    public void setInCart(Transaction inCart) {
+        this.inCart = inCart;
+    }
+
+    public Transaction getInCart() {
+        return inCart;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState != null){
-            isLoggedIn = savedInstanceState.getBoolean("isLoggedIn");
-        }
-        if (!isLoggedIn) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            Log.d(TAG, "onCreate: redirect to login");
-            startActivity(intent);
-//            startActivityForResult(intent,LOGIN_REQUEST_CODE);
-        }
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         setSupportActionBar(binding.appBarMain.toolbar);
 
         binding.appBarMain.fab.setOnClickListener(v -> {
+            inCart.calculateTotalAmount();
+            inCart.setDate(new Date());
             Intent intent = new Intent(this, CheckoutActivity.class);
+            intent.putExtra("cart", inCart);
             startActivity(intent);
         });
         DrawerLayout drawer = binding.drawerLayout;
@@ -56,6 +66,18 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        SharedPreferences sharedPreferences = getSharedPreferences(Config.PREFERENCE_FILE_NAME, Context.MODE_PRIVATE);
+        isLoggedIn = sharedPreferences.getBoolean(Config.SHARED_PREF_IS_LOGGED_IN_KEY, false);
+        if (!isLoggedIn) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            Log.d(TAG, "onCreate: redirect to login");
+            startActivity(intent);
+        }
     }
 
     @Override

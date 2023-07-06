@@ -5,6 +5,8 @@ import android.app.Activity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -22,7 +24,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.warkopzara.Config;
 import com.example.warkopzara.R;
+import com.example.warkopzara.data.model.LoggedInUser;
 import com.example.warkopzara.ui.login.LoginViewModel;
 import com.example.warkopzara.ui.login.LoginViewModelFactory;
 import com.example.warkopzara.databinding.ActivityLoginBinding;
@@ -35,7 +39,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Context context = this;
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -74,7 +78,14 @@ public class LoginActivity extends AppCompatActivity {
                     showLoginFailed(loginResult.getError());
                 }
                 if (loginResult.getSuccess() != null) {
-                    updateUiWithUser(loginResult.getSuccess());
+                    SharedPreferences sharedPreferences = getSharedPreferences(Config.PREFERENCE_FILE_NAME, Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    LoggedInUser result = loginResult.getSuccess();
+                    editor.putString(Config.SHARED_PREF_USER_ID_KEY, result.getUserId());
+                    editor.putString(Config.SHARED_PREF_TOKEN_KEY, result.getToken());
+                    editor.putBoolean(Config.SHARED_PREF_IS_LOGGED_IN_KEY, true);
+                    editor.apply();
+                    updateUiWithUser(result);
                 }
                 setResult(Activity.RESULT_OK);
 
@@ -107,7 +118,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    loginViewModel.login(usernameEditText.getText().toString(),
+                    loginViewModel.login(context, usernameEditText.getText().toString(),
                             passwordEditText.getText().toString());
                 }
                 return false;
@@ -118,13 +129,19 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 loadingProgressBar.setVisibility(View.VISIBLE);
-                loginViewModel.login(usernameEditText.getText().toString(),
+                loginViewModel.login(context,usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
             }
         });
     }
 
-    private void updateUiWithUser(LoggedInUserView model) {
+    @Override
+    public void onBackPressed() {
+        finishAffinity();
+        System.exit(0);
+    }
+
+    private void updateUiWithUser(LoggedInUser model) {
         String welcome = getString(R.string.welcome) + model.getDisplayName();
         // TODO : initiate successful logged in experience
         Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();

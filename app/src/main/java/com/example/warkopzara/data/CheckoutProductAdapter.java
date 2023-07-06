@@ -5,11 +5,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.warkopzara.Config;
 import com.example.warkopzara.R;
 import com.example.warkopzara.data.model.Product;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -49,7 +51,7 @@ public class CheckoutProductAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.layout_checkout_list_item, null);
         }
         Product product = list.get(position);
-        TextView productName = (TextView) convertView.findViewById(R.id.inputProductName);
+        TextView productName = (TextView) convertView.findViewById(R.id.productName);
         TextView productTotalPrice = (TextView) convertView.findViewById(R.id.productTotalPrice);
         TextView productOrderCount = (TextView) convertView.findViewById(R.id.productOrderCount);
 
@@ -63,6 +65,8 @@ public class CheckoutProductAdapter extends BaseAdapter {
         productTotalPrice.setText((CharSequence) priceText);
         productOrderCount.setText((CharSequence) orderCountText);
 
+        String imageUrl = Config.BE_URL+"/api/v1/upload/image/product/"+product.getImage();
+        Picasso.get().load(imageUrl).into((ImageView) convertView.findViewById(R.id.productImage));
 
         return convertView;
     }

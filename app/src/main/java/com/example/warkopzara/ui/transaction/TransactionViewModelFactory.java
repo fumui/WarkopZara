@@ -1,4 +1,4 @@
-package com.example.warkopzara.ui.home;
+package com.example.warkopzara.ui.transaction;
 
 import android.app.Activity;
 
@@ -9,16 +9,17 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.warkopzara.MainActivity;
 import com.example.warkopzara.data.ProductDataSource;
 import com.example.warkopzara.data.ProductRepository;
+import com.example.warkopzara.ui.home.HomeViewModel;
 
 /**
  * ViewModel provider factory to instantiate LoginViewModel.
  * Required given LoginViewModel has a non-empty constructor
  */
-public class HomeViewModelFactory implements ViewModelProvider.Factory {
+public class TransactionViewModelFactory implements ViewModelProvider.Factory {
 
     private MainActivity activity;
 
-    public HomeViewModelFactory(MainActivity activity) {
+    public TransactionViewModelFactory(MainActivity activity) {
         this.activity = activity;
     }
 
