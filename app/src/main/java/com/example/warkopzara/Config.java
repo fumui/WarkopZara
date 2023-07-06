@@ -7,5 +7,5 @@ public class Config {
     public static final String SHARED_PREF_TOKEN_KEY = "token";
     public static final String SHARED_PREF_IS_LOGGED_IN_KEY = "isLoggedIn";
 
-    public static final String BE_URL = "http://10.104.0.254:8000";
+    public static final String BE_URL = "http://192.168.83.84:8000";
 }

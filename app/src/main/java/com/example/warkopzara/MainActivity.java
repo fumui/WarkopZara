@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.widget.Toast;
 
 import com.example.warkopzara.data.model.Transaction;
 import com.example.warkopzara.databinding.ActivityMainBinding;
@@ -13,6 +14,7 @@ import com.example.warkopzara.ui.checkout.CheckoutActivity;
 import com.example.warkopzara.ui.login.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.annotation.Nullable;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -26,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int LOGIN_REQUEST_CODE = 999;
     private static final String TAG = "MainActivity";
+    public static final int CHECKOUT_REQUEST = 999;
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
     private boolean isLoggedIn = false;
@@ -53,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             inCart.setDate(new Date());
             Intent intent = new Intent(this, CheckoutActivity.class);
             intent.putExtra("cart", inCart);
-            startActivity(intent);
+            startActivityForResult(intent, CHECKOUT_REQUEST);
         });
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
@@ -66,6 +69,21 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CHECKOUT_REQUEST && resultCode == 200){
+            inCart = new Transaction();
+        } else {
+            if (data != null){
+                String msg = data.getStringExtra("msg");
+                if (msg != null && !msg.isEmpty()){
+                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                }
+            }
+        }
     }
 
     @Override

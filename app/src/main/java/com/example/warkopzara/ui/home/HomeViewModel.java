@@ -65,7 +65,8 @@ public class HomeViewModel extends ViewModel {
 
                     mProductAdapter.postValue(new ProductAdapter(activity, listProduct));
                 } else {
-                    Log.e(TAG, "Failed to fetch data: status "+statusCode);
+                    Log.e(TAG, "Failed to fetch data: status "+statusCode +" "+ Config.BE_URL+"/api/v1/product/list");
+                    Log.e(TAG, "Failed to fetch data: responseBody "+responseBody);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
